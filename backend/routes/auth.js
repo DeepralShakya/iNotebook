@@ -4,8 +4,10 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fetchuser = require('../middleware/fetchuser');
 
-const JWT_SECRET = 'Deepral';
+
+const JWT_SECRET = 'hello@deepral';
 
 //create user using POST "/api/auth/createuser"
 router.post('/createuser',[
@@ -45,7 +47,7 @@ router.post('/createuser',[
     }
 })
 
-//create user using POST "/api/auth/login"
+//create login using POST "/api/auth/login"
 router.post('/login',[
   body('email', 'Please enter a valid email').isEmail(),
   body('password', 'Password cannot be empty').exists(),
@@ -77,6 +79,18 @@ router.post('/login',[
       console.error(error.message);
       res.status(500).send("Internal server error");
     }
+})
+
+//get loggedIn users detail using POST "/api/auth/getuser"
+router.post('/getuser', fetchuser, async (req, res)=>{
+try {
+  userid = req.user.id;
+  const user = await User.findById(userid).select("-password")
+  res.send(user)
+} catch (error) {
+  console.error(error.message);
+      res.status(500).send("Internal server error");
+}
 })
 
 module.exports = router
